@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import { parseCookies } from 'nookies'
@@ -9,52 +9,47 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
-export function listCompanys() {
-    const [companys, setCompanys] = useState([]);
+function listCompanys({ valueSelect, dispatch }) {
+    const [companyList, setCompanys] = useState(['']);
 
-    const { 'sales-token': token } = parseCookies();
+const { 'sales-token': token } = parseCookies();
 
+
+useEffect(() => {
     axios.get(`http://localhost:3333/lojas`, {
         headers: { 'Authorization': 'Bearer ' + token }
     })
         .then(res => {
             setCompanys(res.data.data);
+            
+
         })
-
-    return (
-        
-        companys.map(company => (<MenuItem value={company.CNPJ}>{company.NOME}</MenuItem>))
-    )
-}
-
+}, [])
 function setSelected(event) {
-
-    return {
-        type: 'SET_SELECT',
-        select: event.target.value
-    };
+        return {
+            type: 'SET_SELECT',
+            select: event.target.value
+        };
 }
-
-const inputSelect = ({ valueSelect, dispatch }) => (
-
-    <div>
+    return (
+        <div>
         <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Empresas</InputLabel>
+            <InputLabel id="demo-simple-select-label">Empresa</InputLabel>
             <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={[valueSelect.select]}
-                label="Empresas"
+                // value={[valueSelect]}
+                value={[valueSelect]}
+                label="Empresa"
                 onChange={(event) => dispatch(setSelected(event))}
             >
-                <MenuItem disabled value="">
-                    <em>Placeholder</em>
+                <MenuItem disabled value="99999999999999">
+                    <em>Selecionar...</em>
                 </MenuItem>
-                {listCompanys()}
+                {companyList.map((company, index) => (<MenuItem key={index} value={company.CNPJ}>{company.NOME}</MenuItem>))}
             </Select>
         </FormControl>
     </div>
-
-);
-
-export default connect(state => ({ valueSelect: state }))(inputSelect)
+    );
+}
+export default connect(state => ({ valueSelect: state.select }))(listCompanys)

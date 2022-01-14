@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { setCookie, parseCookies } from 'nookies'
+import { parseCookies } from 'nookies'
 
 // Material UI
 import {
@@ -19,16 +19,12 @@ import TextField from '@mui/material/TextField';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
 
+
 const columnsLojas = [
-  { field: 'id', headerName: 'Código', type: 'number', width: 80, align:'center', headerAlign: 'center' },
-  { field: 'name', headerName: 'Produto', width: 280,  },
-  { field: 'brand', headerName: 'Marca', width: 110, headerAlign: 'center' },
-  { field: 'qty', headerName: 'Estoque', type: 'number', width: 90, align:'center', headerAlign: 'center' },
-  { field: 'datechange', headerName: 'Ultima Alteração', type: 'date', width: 220, headerAlign: 'center' },
-  { field: 'inactive', headerName: 'Inativo?', type: 'boolean', width: 100 },
-  { field: 'taxation', headerName: 'TRIB/CSOSN', width: 110 },
-  { field: 'obs', headerName: 'Observação', width: 350 }
-  // { field: 'edit', headerName: 'Opções', width: 120, isEditMode: false }
+  { field: 'id', headerName: 'Código', type: 'number', width: 80, align:'center', headerAlign: 'center', hide: true },
+  { field: 'idvendedor', headerName: 'Vendedor', width: 130,headerAlign: 'center', align: 'center'  },
+  { field: 'numbermac', headerName: 'MAC', width: 150, headerAlign: 'center'},
+  { field: 'active', headerName: 'ATIVO?', type: 'boolean', width: 100 },
 ];
 
 function QuickSearchToolbar(props) {
@@ -90,53 +86,46 @@ QuickSearchToolbar.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-
-export function listCompanys() {
+export default function inputSelect() {
 
   const [companys, setCompanys] = useState([]);
 
   const { 'sales-token': token } = parseCookies();
 
-  const cnpj = useSelector((state) => state)
+  const cnpj = useSelector((state) => state.select);
 
-  axios.get(`http://localhost:3333/produtos?cpfcnpj=${cnpj.select}`, {
-    headers: { 'Authorization': 'Bearer ' + token }
-  })
-    .then(res => {
-      setCompanys(res.data.data);
+  useEffect(() =>{
+    axios.get(`http://localhost:3333/tablet?cpfcnpj=${cnpj}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
     })
+      .then(res => {
+        setCompanys(res.data.data);
+      })
+  }, [cnpj])
 
-  return (
-    companys.map(company => ({ 
-      id: company.IDPRO, 
-      name: company.NOME, 
-      brand:company.MARCA, 
-      qty: company.QTE + ' ' + company.UNIDADE, 
-      datechange: company.DTALT, 
-      inactive: company.INATIVO, 
-      ntablets: company.NTABLET,
-      taxation: company.COD_TRIB + '/' + company.CSOSN,
-      obs: company.OBS,
-     }))
-  )
-}
-
-
-
-export default function inputSelect() {
   return (
     <div>
       <InputSelectStore ></InputSelectStore>
       <div style={{ height: 1020, width: '100%', }}>
         <DataGrid
-          rows={listCompanys()}
+          rows={
+            companys.map((company, indice) => ({ 
+              id: indice, 
+              idvendedor: company.IDVENDEDOR, 
+              numbermac: company.MAC, 
+              active: company.ATIVO, 
+              
+            }))
+          }
           columns={columnsLojas}
           components={{ Toolbar: QuickSearchToolbar }}
           pageSize={16}
           rowsPerPageOptions={[19]}
           checkboxSelection={false}
+          
         />
       </div>
     </div>
+
   )
 };

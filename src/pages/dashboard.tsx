@@ -9,12 +9,12 @@ import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Container from '@mui/material/Container';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import LogoutIcon from '@mui/icons-material/Logout';
+import Link from '@mui/material/Link';
 
 // Import Tables List
 import ListStores from './components/table/ListStore'
@@ -24,9 +24,7 @@ import PedStore from './components/table/PedStore'
 import TabletStore from './components/table/TabletStore'
 import SellerStore from './components/table/SellerStore'
 import store from './store';
-
-
-
+import { border } from '@mui/system';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -79,23 +77,18 @@ export default function BasicTabs() {
     setValue(newValue);
   };
 
-  const Item = styled(Paper)(({ theme }) => ({
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.primary,
-  }));
-
   return (
-    <>
+    <div >
       <Provider store={store}>
 
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" style={{height: '100vh',}}>
 
           <Grid container style={{ backgroundColor: '#10965e' }} alignItems="center">
+
             <Grid item lg={2} >
               <span style={{ color: '#fff', fontSize: '14pt', fontWeight: '500', paddingLeft: '35px' }}>Cash Sales</span>
             </Grid>
+
             <Grid item lg={9} >
               <Tabs className="tab-panel-head" textColor="secondary" indicatorColor="secondary" value={value} onChange={handleChange} aria-label="basic tabs example" >
                 <Tab label="Lojas" {...a11yProps(0)} />
@@ -106,40 +99,51 @@ export default function BasicTabs() {
                 <Tab label="Tablets" {...a11yProps(5)} />
               </Tabs>
             </Grid>
+
             <Grid item lg={1} >
               <IconButton aria-label="exit" onClick={exitButton}>
-                <ExitToAppIcon />
+                <LogoutIcon />
               </IconButton>
             </Grid>
+
           </Grid>
 
           <div className="tab-panel-body" >
-            <Grid item lg={12} >
+
+            <Grid item lg={12}  style={{height: '92vh'}}>
+
               <TabPanel value={value} index={0}>
                 <ListStores />
               </TabPanel>
+
               <TabPanel value={value} index={1}>
                 <ProdStore></ProdStore>
               </TabPanel>
+
               <TabPanel value={value} index={2}>
                 <ClientStore></ClientStore>
               </TabPanel>
+
               <TabPanel value={value} index={3}>
                 <PedStore></PedStore>
               </TabPanel>
+
               <TabPanel value={value} index={4}>
                 <SellerStore />
               </TabPanel>
+
               <TabPanel value={value} index={5}>
                 <TabletStore></TabletStore>
               </TabPanel>
+
             </Grid>
+            
           </div>
 
         </Container>
         
       </Provider>
-    </>
+    </div>
   );
 }
 

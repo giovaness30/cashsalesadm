@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Router from 'next/router'
 import { connect } from 'react-redux';
-import axios from 'axios';
-import { parseCookies } from 'nookies'
+import API from '../../../api/api';
 
 // Input material
 import InputLabel from '@mui/material/InputLabel';
@@ -12,19 +12,16 @@ import Select from '@mui/material/Select';
 function listCompanys({ valueSelect, dispatch }) {
     const [companyList, setCompanys] = useState(['']);
 
-const { 'sales-token': token } = parseCookies();
-
 
 useEffect(() => {
-    axios.get(`http://localhost:3333/lojas`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-    })
-        .then(res => {
-            setCompanys(res.data.data);
-            
-
-        })
+    API.get(`/lojas?per_page=999`,)
+        .then(res => {setCompanys(res.data.data);})
+        // .catch((error) => {
+        //     alert(error + ', você sera redirecionado')
+        //     Router.push('/');
+        //   });
 }, [])
+
 function setSelected(event) {
         return {
             type: 'SET_SELECT',

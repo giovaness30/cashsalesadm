@@ -1,32 +1,137 @@
-import { parseCookies } from 'nookies'
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import Router from 'next/router'
+import PropTypes from 'prop-types';
+import API from '../../../api/api';
+
+// Material UI components
 import {
   DataGrid,
+  GridToolbarDensitySelector,
+  GridToolbarFilterButton, ptBR,
   GridActionsCellItem,
-} from '@mui/x-data-grid'
-import { useSelector } from 'react-redux';
-
+} from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
+import Snackbar from '@mui/material/Snackbar';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import PtbrLanguage from '../language/PtbrLanguage';
 
-import AddCompany from '../modal/AddCompany'
-import EditCompany from '../modal/EditCompany'
-import PtbrLanguage from '../language/PtbrLanguage'
+// Import Modal
+import AddCompany from '../modal/AddCompany';
+import EditCompany from '../modal/EditCompany';
+import { textAlign } from '@mui/system';
 
-const { 'sales-token': token } = parseCookies();
+// Quick Filter Material UI
+function escapeRegExp(value) {
+  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
 
+function QuickSearchToolbar(props) {
+  return (
+    <Box
+      sx={{
+        p: 0.5,
+        pb: 0,
+        justifyContent: 'space-between',
+        display: 'flex',
+        alignItems: 'flex-start',
+        flexWrap: 'wrap',
+      }}
+    >
+      <div>
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector />
+      </div>
+      <TextField
+        variant="standard"
+        value={props.value}
+        onChange={props.onChange}
+        placeholder="Pesquisar..."
+        InputProps={{
+          startAdornment: <SearchIcon fontSize="small" />,
+          endAdornment: (
+            <IconButton
+              title="Limpar"
+              aria-label="Limpar"
+              size="small"
+              style={{ visibility: props.value ? 'visible' : 'hidden' }}
+              onClick={props.clearSearch}
+            >
+              <ClearIcon fontSize="small" />
+            </IconButton>
+          ),
+        }}
+        sx={{
+          width: {
+            xs: 1,
+            sm: 'auto',
+          },
+          m: (theme) => theme.spacing(1, 0.5, 1.5),
+          '& .MuiSvgIcon-root': {
+            mr: 0.5,
+          },
+          '& .MuiInput-underline:before': {
+            borderBottom: 1,
+            borderColor: 'divider',
+            color: 'green'
+          },
+        }}
+      />
+    </Box>
+  );
+}
+
+QuickSearchToolbar.propTypes = {
+  clearSearch: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
+};
 
 export default function StoreList() {
 
+  
   const [companys, setCompanys] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(false);
 
-  const refresh = useSelector((state) => state.refresh);
+  // Varaveis do filtros da Datagrid
+  const [searchText, setSearchText] = React.useState('');
+  const [rows, setRows] = React.useState(companys);
+
+  const requestSearch = (searchValue) => {
+    setSearchText(searchValue);
+    const searchRegex = new RegExp(escapeRegExp(searchValue), 'i');
+    const filteredRows = companys.filter((row) => {
+      return Object.keys(row).some((field) => {
+        return searchRegex.test(row[field]);
+      });
+    });
+    setRows(filteredRows);
+  };
+
+  React.useEffect(() => {
+    setRows(companys);
+  }, [companys]);
+
+
+  // Snack e Alert const
+  const [snackSuccess, setSnackSuccess] = React.useState(false);
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
+  // const refresh = useSelector((state) => state.refresh);
 
   const columnsLojas = [
     { field: 'id', headerName: 'Código', type: 'number', width: 100 },
@@ -51,7 +156,6 @@ export default function StoreList() {
     width: 600,
     height: 400,
     bgcolor: 'background.paper',
-    // border: '1px solid #000',
     boxShadow: 24,
     p: 4,
     '& .MuiTextField-root': { m: 1, width: '25ch' },
@@ -61,112 +165,151 @@ export default function StoreList() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [inputModalIdloja, setInputModalIdloja] = React.useState(' ');
-  const [inputModalCpfcnpj, setInputModalCpfcnpj] = React.useState(' ');
-  const [inputModalName, setInputModalName] = React.useState(' ');
-  const [inputModalFantasy, setInputModalFantasy] = React.useState(' ');
-  const [inputModalTablet, setInputModalTablet] = React.useState(' ');
+  const [inputs, setInputs] = useState({
+    idLoja: 0,
+    cpfCnpj: 0,
+    name: '',
+    fantasy: '',
+    tablet: 0
+  })
 
   const editCompany = React.useCallback(
     (row) => () => {
       // console.log(row);
-      setInputModalIdloja(row.idloja);
-      setInputModalCpfcnpj(row.cnpj);
-      setInputModalName(row.nome);
-      setInputModalFantasy(row.fantasia);
-      setInputModalTablet(row.ntablets);
+      setInputs({ ...inputs, idLoja: row.id, cpfCnpj: row.cnpj, name: row.nome, fantasy: row.fantasia, tablet: row.ntablets, });
       handleOpen()
 
     },
     [],
   );
-  function salvarEditCompany(){
-    const data = JSON.stringify([
-      {
-        "IDLOJA": {inputModalIdloja},
-        "CNPJ": {inputModalCpfcnpj},
-        "NOME": {inputModalName},
-        "FANTASIA": {inputModalFantasy},
-        "NTABLET": {inputModalTablet},
-      }
-    ]);
 
- 
-      axios.post(`http://localhost:3333/lojas`, {
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      data: data
-    })
+  function salvarEditCompany() {
+    var data = JSON.stringify({
+      "IDLOJA": inputs.idLoja,
+      "CNPJ": inputs.cpfCnpj,
+      "NOME": inputs.name,
+      "FANTASIA": inputs.fantasy,
+      "NTABLET": inputs.tablet
+    });
+
+    API.patch(`/lojas`, data)
       .then(res => {
-        console.log(res);
-
+        setSnackSuccess(true);
+        setRefreshTable(true);
+        handleClose()
       })
-    
+      // .catch((error) => {
+      //   alert(error + ', você sera redirecionado')
+      //   Router.push('/');
+      // });
+      
+
   }
 
-
   React.useEffect(() => {
-    axios.get(`http://localhost:3333/lojas`, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
+    API.get(`/lojas?per_page=999`)
       .then(res => {
-        const stores = res.data.data;
-        setCompanys(stores);
-      })
-  }, [refresh])
-
-  return (
-    <div style={{ height: 1020, width: '100%' }}>
-      <AddCompany />
-      <DataGrid
-        rows={companys.map(company => ({
+        setCompanys(res.data.data.map(company => ({
           id: company.IDLOJA,
           cnpj: company.CNPJ,
           nome: company.NOME,
           fantasia: company.FANTASIA,
           ntablets: company.NTABLET
-        }))}
+        })));
+        setRefreshTable(false);
+      })
+      // .catch((error) => {
+      //   alert(error + ', você sera redirecionado')
+      //   Router.push('/');
+      // });
+
+  }, [refreshTable])
+
+  return (
+
+    <div style={{height: '80vh'}}>
+
+      <AddCompany />
+      <DataGrid
+        rows={rows}
         columns={columnsLojas}
         pageSize={17}
         rowsPerPageOptions={[17]}
         checkboxSelection={false}
         localeText={PtbrLanguage}
+        components={{ Toolbar: QuickSearchToolbar }}
+        componentsProps={{
+          toolbar: {
+            value: searchText,
+            onChange: (event) => requestSearch(event.target.value),
+            clearSearch: () => requestSearch(''),
+          },
+        }}
       />
       <Modal
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+
       >
         <Box sx={style}>
-          <TextField
-            id="inputCpfcnpj"
-            label="CPF/CNPJ"
-            value={inputModalCpfcnpj}
-            onChange={e => setInputModalCpfcnpj(e.target.value)}
-          />
-          <TextField
-            id="inputName"
-            label="Nome"
-            value={inputModalName}
-            onChange={e => setInputModalName(e.target.value)}
-          />
-          <TextField
-            id="setInputFantasy"
-            label="Fantasia"
-            value={inputModalFantasy}
-            onChange={e => setInputModalFantasy(e.target.value)}
-          />
-          <TextField
-            id="inputTablet"
-            label="Tablet"
-            value={inputModalTablet}
-            onChange={e => setInputModalTablet(e.target.value)}
-          />
-          <Button variant="contained" onClick={salvarEditCompany} endIcon={<SendIcon />}>
-            Salvar
-          </Button>
+          <Stack
+            justifyContent="center"
+            alignItems="center"
+            spacing={2}>
+            <TextField
+              id="inputCpfcnpj"
+              label="CPF/CNPJ"
+              type="number"
+              value={inputs.cpfCnpj}
+              onChange={e => setInputs({ ...inputs, cpfCnpj: Number(e.target.value) })}
+              disabled
+            />
+            <TextField
+              id="inputName"
+              label="Nome"
+              value={inputs.name}
+              onChange={e => setInputs({ ...inputs, name: e.target.value })}
+            />
+            <TextField
+              id="setInputFantasy"
+              label="Fantasia"
+              value={inputs.fantasy}
+              onChange={e => setInputs({ ...inputs, fantasy: e.target.value })}
+            />
+            <TextField
+              id="inputTablet"
+              label="Tablet"
+              value={inputs.tablet}
+              onChange={e => setInputs({ ...inputs, tablet: Number(e.target.value) })}
+            />
+          </Stack>
+
+          <Stack direction="row"
+            justifyContent="flex-end"
+            alignItems="flex-end"
+            spacing={2}>
+            <Button variant="contained" onClick={salvarEditCompany} endIcon={<SendIcon />}>
+              Salvar
+            </Button>
+            <Button variant="contained" onClick={handleClose} endIcon={<CloseIcon />}>
+              Fechar
+            </Button>
+          </Stack>
+
         </Box>
+
       </Modal>
+
+      <Snackbar
+        open={snackSuccess}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        onClose={() => { setSnackSuccess(false) }}>
+        <Alert onClose={() => { setSnackSuccess(false) }} severity="success" sx={{ width: '100%' }}>Empresa Alterada!</Alert>
+      </Snackbar>
+
     </div>
   )
 }

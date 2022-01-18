@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import API from '../../../api/api';
+import { connect, dispatch } from 'react-redux';
+
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -7,13 +9,10 @@ import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
-import { parseCookies } from 'nookies'
-import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
-import IconButton from '@mui/material/IconButton';
+
 import CloseIcon from '@mui/icons-material/Close';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { Tablet } from '@mui/icons-material';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -21,8 +20,6 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
-
-const { 'sales-token': token } = parseCookies();
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -38,7 +35,7 @@ const style = {
     '& .MuiTextField-root': { m: 1, width: '25ch' },
 };
 
-export default function BasicModal() {
+const BasicModal = ({refreshTable, dispatch}) => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
 
@@ -48,13 +45,18 @@ export default function BasicModal() {
         cpfCnpj: '',
         name: '',
         fantasy: '',
+        fone: '',
+        email: '',
         tablet: 0,
     })
     const [errorCpfCnpj, setErrorCpfCnpj] = useState(false);
     const [errorName, setErrorName] = useState(false);
     const [errorFantasy, setErrorFantasy] = useState(false);
+    const [errorFone, setErrorFone] = useState(false);
+    const [errorEmail, setErrorEmail] = useState(false);
+    const [errorTablet, setErrorTablet] = useState(false);
 
-    const clearInputs = () => setInputs({ ...inputs, cpfCnpj: '', name: '', dantasy: '', tablet: 0, });
+    const clearInputs = () => setInputs({ ...inputs, cpfCnpj: '', name: '', fantasy: '',fone: '', email: '', tablet: 0, });
 
     const [snackError, setSnackError] = React.useState(false);
     const [snackSuccess, setSnackSuccess] = React.useState(false);
@@ -66,7 +68,9 @@ export default function BasicModal() {
                 "CNPJ": inputs.cpfCnpj,
                 "NOME": inputs.name,
                 "FANTASIA": inputs.fantasy,
-                "NTABLET": inputs.tablet
+                "NTABLET": inputs.tablet,
+                "FONE": inputs.fone,
+                "EMAIL": inputs.email
             }]
         );
         API.post(`/lojas`, data)
@@ -78,6 +82,7 @@ export default function BasicModal() {
                     setSnackErrorMsg(`Empresa id:${res.idloja}, CPF/CNPJ:${res.cnpj} Cadastrada com Suceso!`);
                     clearInputs()
                     handleClose()
+                    dispatch(setRefresh(true))
                 } else {
                     setSnackError(true);
                     setSnackErrorMsg(res.message);
@@ -96,18 +101,32 @@ export default function BasicModal() {
         setErrorCpfCnpj(false);
         setErrorName(false);
         setErrorFantasy(false);
+        setErrorFone(false);
+        setErrorEmail(false);
+        setErrorTablet(false);
 
         if (inputs.cpfCnpj == '' || inputs.cpfCnpj.length < 11 || inputs.cpfCnpj.length > 14) { setErrorCpfCnpj(true) }
         if (inputs.name == '') { setErrorName(true) }
         if (inputs.fantasy == '') { setErrorFantasy(true) }
-        if(inputs.cpfCnpj && inputs.name && inputs.fantasy && inputs.tablet){
+        if (inputs.fone == '') { setErrorFone(true) }
+        if (inputs.email == '') { setErrorEmail(true) }
+        if (inputs.tablet < 0) { setErrorTablet(true) }
+        if (inputs.cpfCnpj && inputs.name && inputs.fantasy && inputs.tablet && inputs.fone && inputs.email) {
             postNewCompany()
         }
-
+        
 
     }
+    // const refreshTable = useSelector((state) => state.refresh);
 
 
+    function setRefresh(refreshTable) {
+        return{
+            type: 'SET_REFRESH',
+            refreshTable,
+        };
+        
+    }
     return (
         <div>
             <Button onClick={handleOpen}>Adicionar +</Button>
@@ -151,6 +170,24 @@ export default function BasicModal() {
                             type="number"
                             value={inputs.tablet}
                             onChange={e => setInputs({ ...inputs, tablet: Number(e.target.value) })}
+                            error={errorTablet}
+                        />
+                        <TextField
+                            required
+                            id="inputTablet"
+                            label="Fone"
+                            type="number"
+                            value={inputs.fone}
+                            onChange={e => setInputs({ ...inputs, fone: e.target.value })}
+                            error={errorFone}
+                        />
+                        <TextField
+                            required
+                            id="inputTablet"
+                            label="Email"
+                            value={inputs.email}
+                            onChange={e => setInputs({ ...inputs, email: e.target.value })}
+                            error={errorEmail}
                         />
                         <Stack direction="row"
                             justifyContent="flex-end"
@@ -189,3 +226,5 @@ export default function BasicModal() {
         </div>
     );
 }
+
+export default connect(state => ({refreshTable: state.refreshTable}))(BasicModal)

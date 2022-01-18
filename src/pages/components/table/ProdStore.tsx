@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Router from 'next/router'
 import { useSelector } from 'react-redux';
 import API from '../../../api/api';
 
@@ -16,19 +15,13 @@ import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import InputSelectStore from '../Input/InputSelectStore';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CloseIcon from '@mui/icons-material/Close';
 import PtbrLanguage from '../language/PtbrLanguage'
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow'
-
-import { ThemeProvider } from '@mui/material/styles';
 
 // Quick Filter Material UI
 function escapeRegExp(value) {
@@ -212,7 +205,6 @@ export default function inputSelect() {
     transform: 'translate(-50%, -50%)',
     width: 600,
     bgcolor: 'background.paper',
-    border: '2px solid #000',
     boxShadow: 24,
     p: 4,
   };
@@ -267,7 +259,9 @@ export default function inputSelect() {
                   localeText={PtbrLanguage}
                 />
               </div>
-              <button onClick={handleClose}>Fechar</button>
+              <Button variant="contained" onClick={handleClose} endIcon={<CloseIcon />}>
+                Fechar
+              </Button>
 
 
             </Stack>

@@ -2,7 +2,7 @@ import { createStore } from 'redux';
 
 const INICIAL_STATE = {
     select: '99999999999999',
-    refresh: 0,
+    refreshTable: false,
 
 }
 
@@ -11,7 +11,7 @@ function reducer(state = INICIAL_STATE, action) {
         return { ...state, select: action.select }
     }
     if (action.type === 'SET_REFRESH') {
-        return { ...state, refresh: action.refresh }
+        return { ...state, refreshTable: action.refreshTable } 
     }
 
     return state

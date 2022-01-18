@@ -5,13 +5,11 @@ import { Provider } from 'react-redux';
 import Router from 'next/router'
 
 // Material UI components
-import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Container from '@mui/material/Container';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Link from '@mui/material/Link';
@@ -24,7 +22,6 @@ import PedStore from './components/table/PedStore'
 import TabletStore from './components/table/TabletStore'
 import SellerStore from './components/table/SellerStore'
 import store from './store';
-import { border } from '@mui/system';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -81,12 +78,12 @@ export default function BasicTabs() {
     <div >
       <Provider store={store}>
 
-        <Container maxWidth="lg" style={{height: '100vh',}}>
+        <Container maxWidth="lg" style={{ height: '100vh', }}>
 
           <Grid container style={{ backgroundColor: '#10965e' }} alignItems="center">
 
             <Grid item lg={2} >
-              <span style={{ color: '#fff', fontSize: '14pt', fontWeight: '500', paddingLeft: '35px' }}>Cash Sales</span>
+              <Link href="/dashboard" underline="none"><span style={{ color: '#fff', fontSize: '14pt', fontWeight: '500', paddingLeft: '35px' }}>Cash Sales</span></Link>
             </Grid>
 
             <Grid item lg={9} >
@@ -110,7 +107,7 @@ export default function BasicTabs() {
 
           <div className="tab-panel-body" >
 
-            <Grid item lg={12}  style={{height: '92vh'}}>
+            <Grid item lg={12} style={{ height: '92vh' }}>
 
               <TabPanel value={value} index={0}>
                 <ListStores />
@@ -137,11 +134,11 @@ export default function BasicTabs() {
               </TabPanel>
 
             </Grid>
-            
+
           </div>
 
         </Container>
-        
+
       </Provider>
     </div>
   );

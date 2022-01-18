@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Router from 'next/router'
+import { connect, dispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import API from '../../../api/api';
+
+import { useSelector } from 'react-redux';
 
 // Material UI components
 import {
@@ -96,11 +98,10 @@ QuickSearchToolbar.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default function StoreList() {
+const storeList = ({ refreshTable , dispatch}) => {
 
   
   const [companys, setCompanys] = useState([]);
-  const [refreshTable, setRefreshTable] = useState(false);
 
   // Varaveis do filtros da Datagrid
   const [searchText, setSearchText] = React.useState('');
@@ -195,8 +196,9 @@ export default function StoreList() {
     API.patch(`/lojas`, data)
       .then(res => {
         setSnackSuccess(true);
-        setRefreshTable(true);
+        dispatch(setRefresh(true))
         handleClose()
+        
       })
       // .catch((error) => {
       //   alert(error + ', você sera redirecionado')
@@ -206,6 +208,13 @@ export default function StoreList() {
 
   }
 
+  function setRefresh(refreshTable) {
+    return{
+        type: 'SET_REFRESH',
+        refreshTable,
+    };
+    
+}
   React.useEffect(() => {
     API.get(`/lojas?per_page=999`)
       .then(res => {
@@ -216,8 +225,9 @@ export default function StoreList() {
           fantasia: company.FANTASIA,
           ntablets: company.NTABLET
         })));
-        setRefreshTable(false);
+        dispatch(setRefresh(false))
       })
+      
       // .catch((error) => {
       //   alert(error + ', você sera redirecionado')
       //   Router.push('/');
@@ -313,3 +323,4 @@ export default function StoreList() {
     </div>
   )
 }
+export default connect(state => ({refreshTable: state.refreshTable}))(storeList)

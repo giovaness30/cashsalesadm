@@ -1,31 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import API from '../../../api/api';
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import API from '../../../api/api'
 
 // Material UI
 import {
   DataGrid,
   GridToolbarDensitySelector,
-  GridToolbarFilterButton, ptBR,
-  GridActionsCellItem,
-} from '@mui/x-data-grid';
-import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import InputSelectStore from '../Input/InputSelectStore';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import ClearIcon from '@mui/icons-material/Clear';
-import SearchIcon from '@mui/icons-material/Search';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CloseIcon from '@mui/icons-material/Close';
+  GridToolbarFilterButton,
+  ptBR,
+  GridActionsCellItem
+} from '@mui/x-data-grid'
+import PropTypes from 'prop-types'
+import Box from '@mui/material/Box'
+import Modal from '@mui/material/Modal'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import InputSelectStore from '../Input/InputSelectStore'
+import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import ClearIcon from '@mui/icons-material/Clear'
+import SearchIcon from '@mui/icons-material/Search'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
+import CloseIcon from '@mui/icons-material/Close'
 import PtbrLanguage from '../language/PtbrLanguage'
 
 // Quick Filter Material UI
 function escapeRegExp(value) {
-  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
 }
 
 function QuickSearchToolbar(props) {
@@ -37,7 +38,7 @@ function QuickSearchToolbar(props) {
         justifyContent: 'space-between',
         display: 'flex',
         alignItems: 'flex-start',
-        flexWrap: 'wrap',
+        flexWrap: 'wrap'
       }}
     >
       <div>
@@ -61,92 +62,154 @@ function QuickSearchToolbar(props) {
             >
               <ClearIcon fontSize="small" />
             </IconButton>
-          ),
+          )
         }}
         sx={{
           width: {
             xs: 1,
-            sm: 'auto',
+            sm: 'auto'
           },
-          m: (theme) => theme.spacing(1, 0.5, 1.5),
+          m: theme => theme.spacing(1, 0.5, 1.5),
           '& .MuiSvgIcon-root': {
-            mr: 0.5,
+            mr: 0.5
           },
           '& .MuiInput-underline:before': {
             borderBottom: 1,
             borderColor: 'divider',
             color: 'green'
-          },
+          }
         }}
       />
     </Box>
-  );
+  )
 }
 
 QuickSearchToolbar.propTypes = {
   clearSearch: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string.isRequired,
-};
+  value: PropTypes.string.isRequired
+}
 
 export default function inputSelect() {
-  const [companys, setCompanys] = useState([]);
-  const [listPropre, setListPropre] = useState([]);
-  const [prodToPropre, setProdToPropre] = useState('');
-  const cnpj = useSelector((state) => state.select)
+  const [companys, setCompanys] = useState([])
+  const [listPropre, setListPropre] = useState([])
+  const [prodToPropre, setProdToPropre] = useState('')
+  const cnpj = useSelector(state => state.select)
 
   const dateFormat = {
-    valueFormatter: (params) => {
-      const date = new Date(params.value);
-      const dateFormatted = date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-      const timeFormatted = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      return `${dateFormatted} - ${timeFormatted}`;
+    valueFormatter: params => {
+      const date = new Date(params.value)
+      const dateFormatted = date.toLocaleDateString('pt-BR', {
+        timeZone: 'UTC'
+      })
+      const timeFormatted = date.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      return `${dateFormatted} - ${timeFormatted}`
     }
-  };
+  }
 
   // Columns
   const columnsLojas = [
-    { field: 'id', headerName: 'Código', type: 'number', width: 80, align: 'center', headerAlign: 'center' },
-    { field: 'name', headerName: 'Produto', width: 280, },
+    {
+      field: 'id',
+      headerName: 'Código',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { field: 'name', headerName: 'Produto', width: 280 },
     { field: 'brand', headerName: 'Marca', width: 110, headerAlign: 'center' },
-    { field: 'qty', headerName: 'Estoque', type: 'number', width: 90, align: 'center', headerAlign: 'center' },
-    { field: 'unit', headerName: 'UN', type: 'string', width: 50, align: 'center', headerAlign: 'center' },
+    {
+      field: 'qty',
+      headerName: 'Estoque',
+      type: 'number',
+      width: 90,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'unit',
+      headerName: 'UN',
+      type: 'string',
+      width: 50,
+      align: 'center',
+      headerAlign: 'center'
+    },
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Preços',
-      getActions: (params) => [
-        <GridActionsCellItem icon={<AttachMoneyIcon />} onClick={priceRow(params)} label="preços" />
+      getActions: params => [
+        <GridActionsCellItem
+          icon={<AttachMoneyIcon />}
+          onClick={priceRow(params)}
+          label="preços"
+        />
       ]
     },
     { field: 'obs', headerName: 'Observação', width: 350 },
     { field: 'inactive', headerName: 'Inativo?', type: 'boolean', width: 100 },
-    { field: 'datechange', headerName: 'Ultima Alteração', type: 'date', width: 220, headerAlign: 'center', align: 'center', ...dateFormat },
+    {
+      field: 'datechange',
+      headerName: 'Ultima Alteração',
+      type: 'date',
+      width: 220,
+      headerAlign: 'center',
+      align: 'center',
+      ...dateFormat
+    }
     // { field: 'taxation', headerName: 'TRIB/CSOSN', width: 110 },
-
-  ];
+  ]
 
   const columnsPropre = [
-    { field: 'id', headerName: 'Código', type: 'number', width: 80, align: 'center', headerAlign: 'center' },
-    { field: 'grade', headerName: 'Grade', type: 'number', width: 80, align: 'center', headerAlign: 'center' },
-    { field: 'preco', headerName: 'Preço', type: 'number', width: 80, align: 'center', headerAlign: 'center' },
-    { field: 'markup', headerName: 'MarkUp', type: 'number', width: 80, align: 'center', headerAlign: 'center' },
-  ];
+    {
+      field: 'id',
+      headerName: 'Código',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'grade',
+      headerName: 'Grade',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'preco',
+      headerName: 'Preço',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'markup',
+      headerName: 'MarkUp',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    }
+  ]
 
   const priceRow = React.useCallback(
-    (params) => () => {
-      setProdToPropre(params.row.name);
+    params => () => {
+      setProdToPropre(params.row.name)
 
-      API.get(`/propre?cpfcnpj=${cnpj}&idpro=${params.id}`)
-        .then(res => {
-          setListPropre(res.data.data)
-        })
+      API.get(`/propre?cpfcnpj=${cnpj}&idpro=${params.id}`).then(res => {
+        setListPropre(res.data.data)
+      })
       handleOpen()
     },
-    [],
-  );
-
-
+    []
+  )
 
   // Faz requisição ao BackEnd quando CNPJ mudar e faz a lista de empresas para tabela
   useEffect(() => {
@@ -163,9 +226,12 @@ export default function inputSelect() {
             inactive: company.INATIVO,
             ntablets: company.NTABLET,
             // taxation: company.COD_TRIB + '/' + company.CSOSN,
-            obs: company.OBS,
+            obs: company.OBS
           }))
-        );
+        )
+      })
+      .catch(error => {
+        alert('Sem retorno do Banco de dados, Contate a Essystem !')
       })
     // .catch((error) => {
     //   alert(error + ', você sera redirecionado')
@@ -175,28 +241,28 @@ export default function inputSelect() {
   }, [cnpj])
 
   // Varaveis do filtros da Datagrid
-  const [searchText, setSearchText] = React.useState('');
-  const [rows, setRows] = React.useState(companys);
+  const [searchText, setSearchText] = React.useState('')
+  const [rows, setRows] = React.useState(companys)
 
-  const requestSearch = (searchValue) => {
-    setSearchText(searchValue);
-    const searchRegex = new RegExp(escapeRegExp(searchValue), 'i');
-    const filteredRows = companys.filter((row) => {
-      return Object.keys(row).some((field) => {
-        return searchRegex.test(row[field]);
-      });
-    });
-    setRows(filteredRows);
-  };
+  const requestSearch = searchValue => {
+    setSearchText(searchValue)
+    const searchRegex = new RegExp(escapeRegExp(searchValue), 'i')
+    const filteredRows = companys.filter(row => {
+      return Object.keys(row).some(field => {
+        return searchRegex.test(row[field])
+      })
+    })
+    setRows(filteredRows)
+  }
 
   React.useEffect(() => {
-    setRows(companys);
-  }, [companys]);
+    setRows(companys)
+  }, [companys])
 
   // Variaveis/estilos do Modal de preço
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [open, setOpen] = React.useState(false)
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
 
   const styleModalPrice = {
     position: 'absolute',
@@ -206,14 +272,13 @@ export default function inputSelect() {
     width: 600,
     bgcolor: 'background.paper',
     boxShadow: 24,
-    p: 4,
-  };
-
+    p: 4
+  }
 
   return (
     <div>
-      <InputSelectStore ></InputSelectStore>
-      <div style={{ height: '80vh', width: '100%', }}>
+      <InputSelectStore></InputSelectStore>
+      <div style={{ height: '80vh', width: '100%' }}>
         <DataGrid
           localeText={{ ptBR }}
           rows={rows}
@@ -225,9 +290,9 @@ export default function inputSelect() {
           componentsProps={{
             toolbar: {
               value: searchText,
-              onChange: (event) => requestSearch(event.target.value),
-              clearSearch: () => requestSearch(''),
-            },
+              onChange: event => requestSearch(event.target.value),
+              clearSearch: () => requestSearch('')
+            }
           }}
           localeText={PtbrLanguage}
         />
@@ -238,19 +303,15 @@ export default function inputSelect() {
           aria-describedby="modal-modal-description"
         >
           <Box sx={styleModalPrice}>
-            <Stack
-              justifyContent="center"
-              alignItems="center"
-              spacing={1}>
-
+            <Stack justifyContent="center" alignItems="center" spacing={1}>
               <h3>Produto: {prodToPropre}</h3>
-              <div style={{ height: 400, width: '100%', }}>
+              <div style={{ height: 400, width: '100%' }}>
                 <DataGrid
                   rows={listPropre.map(propre => ({
                     id: propre.idpreco,
                     grade: propre.idgra,
                     preco: 'R$: ' + propre.pvenda,
-                    markup: propre.markup + '%',
+                    markup: propre.markup + '%'
                   }))}
                   columns={columnsPropre}
                   pageSize={6}
@@ -259,15 +320,17 @@ export default function inputSelect() {
                   localeText={PtbrLanguage}
                 />
               </div>
-              <Button variant="contained" onClick={handleClose} endIcon={<CloseIcon />}>
+              <Button
+                variant="contained"
+                onClick={handleClose}
+                endIcon={<CloseIcon />}
+              >
                 Fechar
               </Button>
-
-
             </Stack>
           </Box>
         </Modal>
       </div>
     </div>
   )
-};
+}

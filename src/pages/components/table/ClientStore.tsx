@@ -1,38 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import Router from 'next/router'
-import { useSelector } from 'react-redux';
-import API from '../../../api/api';
+import { useSelector } from 'react-redux'
+import API from '../../../api/api'
 
 // Material UI
 import {
   DataGrid,
   GridToolbarDensitySelector,
-  GridToolbarFilterButton, ptBR,
-  GridActionsCellItem,
-} from '@mui/x-data-grid';
-import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import InputSelectStore from '../Input/InputSelectStore';
-import IconButton from '@mui/material/IconButton';
-import ClearIcon from '@mui/icons-material/Clear';
-import SearchIcon from '@mui/icons-material/Search';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+  GridToolbarFilterButton,
+  ptBR,
+  GridActionsCellItem
+} from '@mui/x-data-grid'
+import PropTypes from 'prop-types'
+import Box from '@mui/material/Box'
+import Modal from '@mui/material/Modal'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import InputSelectStore from '../Input/InputSelectStore'
+import IconButton from '@mui/material/IconButton'
+import ClearIcon from '@mui/icons-material/Clear'
+import SearchIcon from '@mui/icons-material/Search'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import PtbrLanguage from '../language/PtbrLanguage'
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles'
 
 // Quick Filter Material UI
 function escapeRegExp(value) {
-  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
 }
 
 function QuickSearchToolbar(props) {
@@ -44,7 +45,7 @@ function QuickSearchToolbar(props) {
         justifyContent: 'space-between',
         display: 'flex',
         alignItems: 'flex-start',
-        flexWrap: 'wrap',
+        flexWrap: 'wrap'
       }}
     >
       <div>
@@ -68,63 +69,99 @@ function QuickSearchToolbar(props) {
             >
               <ClearIcon fontSize="small" />
             </IconButton>
-          ),
+          )
         }}
         sx={{
           width: {
             xs: 1,
-            sm: 'auto',
+            sm: 'auto'
           },
-          m: (theme) => theme.spacing(1, 0.5, 1.5),
+          m: theme => theme.spacing(1, 0.5, 1.5),
           '& .MuiSvgIcon-root': {
-            mr: 0.5,
+            mr: 0.5
           },
           '& .MuiInput-underline:before': {
             borderBottom: 1,
             borderColor: 'divider',
             color: 'green'
-          },
+          }
         }}
       />
     </Box>
-  );
+  )
 }
 
 QuickSearchToolbar.propTypes = {
   clearSearch: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string.isRequired,
-};
+  value: PropTypes.string.isRequired
+}
 
 export default function inputSelect() {
-  const [companys, setCompanys] = useState([]);
-  const [listPropre, setListPropre] = useState([]);
-  const [prodToPropre, setProdToPropre] = useState('');
-  const cnpj = useSelector((state) => state.select)
+  const [companys, setCompanys] = useState([])
+  const [listPropre, setListPropre] = useState([])
+  const [prodToPropre, setProdToPropre] = useState('')
+  const cnpj = useSelector(state => state.select)
 
   const dateFormat = {
-    valueFormatter: (params) => {
-      const date = new Date(params.value);
-      const dateFormatted = date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-      const timeFormatted = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      return `${dateFormatted} - ${timeFormatted}`;
+    valueFormatter: params => {
+      const date = new Date(params.value)
+      const dateFormatted = date.toLocaleDateString('pt-BR', {
+        timeZone: 'UTC'
+      })
+      const timeFormatted = date.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      return `${dateFormatted} - ${timeFormatted}`
     }
-  };
+  }
 
   // Columns
   const columnsLojas = [
-    { field: 'id', headerName: 'Código', type: 'number', width: 80, align: 'center', headerAlign: 'center' },
-    { field: 'name', headerName: 'Cliente', type: 'string', width: 280, },
-    { field: 'fantasy', headerName: 'Fantasia', type: 'string', width: 200, },
-    { field: 'nickname', headerName: 'Apelido', type: 'number', width: 150, align: 'center', headerAlign: 'center' },
-    { field: 'cnpjcpf', headerName: 'CNPJ/CPF', type: 'number', width: 150, headerAlign: 'center' },
-    { field: 'ie', headerName: 'IE', type: 'number', width: 130, headerAlign: 'center' },
+    {
+      field: 'id',
+      headerName: 'Código',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { field: 'name', headerName: 'Cliente', type: 'string', width: 280 },
+    { field: 'fantasy', headerName: 'Fantasia', type: 'string', width: 200 },
+    {
+      field: 'nickname',
+      headerName: 'Apelido',
+      type: 'number',
+      width: 150,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'cnpjcpf',
+      headerName: 'CNPJ/CPF',
+      type: 'number',
+      width: 150,
+      headerAlign: 'center'
+    },
+    {
+      field: 'ie',
+      headerName: 'IE',
+      type: 'number',
+      width: 130,
+      headerAlign: 'center'
+    },
     { field: 'address', headerName: 'Endereço', type: 'string', width: 210 },
-    { field: 'fone', headerName: 'Telefone', type: 'number', width: 130, align: 'center', headerAlign: 'center'},
+    {
+      field: 'fone',
+      headerName: 'Telefone',
+      type: 'number',
+      width: 130,
+      align: 'center',
+      headerAlign: 'center'
+    },
     { field: 'obs', headerName: 'Observação', type: 'string', width: 350 }
-
-  ];
-
+  ]
 
   // Faz requisição ao BackEnd quando CNPJ mudar e faz a lista de empresas para tabela
   useEffect(() => {
@@ -140,9 +177,12 @@ export default function inputSelect() {
             ie: company.IE,
             address: company.ENDERECO,
             fone: company.FONE,
-            obs: company.OBS,
+            obs: company.OBS
           }))
-        );
+        )
+      })
+      .catch(error => {
+        alert('Sem retorno do Banco de dados, Contate a Essystem !')
       })
     // .catch((error) => {
     //   alert(error + ', você sera redirecionado')
@@ -152,28 +192,28 @@ export default function inputSelect() {
   }, [cnpj])
 
   // Varaveis do filtros da Datagrid
-  const [searchText, setSearchText] = React.useState('');
-  const [rows, setRows] = React.useState(companys);
+  const [searchText, setSearchText] = React.useState('')
+  const [rows, setRows] = React.useState(companys)
 
-  const requestSearch = (searchValue) => {
-    setSearchText(searchValue);
-    const searchRegex = new RegExp(escapeRegExp(searchValue), 'i');
-    const filteredRows = companys.filter((row) => {
-      return Object.keys(row).some((field) => {
-        return searchRegex.test(row[field]);
-      });
-    });
-    setRows(filteredRows);
-  };
+  const requestSearch = searchValue => {
+    setSearchText(searchValue)
+    const searchRegex = new RegExp(escapeRegExp(searchValue), 'i')
+    const filteredRows = companys.filter(row => {
+      return Object.keys(row).some(field => {
+        return searchRegex.test(row[field])
+      })
+    })
+    setRows(filteredRows)
+  }
 
   React.useEffect(() => {
-    setRows(companys);
-  }, [companys]);
+    setRows(companys)
+  }, [companys])
 
   return (
     <div>
-      <InputSelectStore ></InputSelectStore>
-      <div style={{ height: '80vh', width: '100%', }}>
+      <InputSelectStore></InputSelectStore>
+      <div style={{ height: '80vh', width: '100%' }}>
         <DataGrid
           localeText={{ ptBR }}
           rows={rows}
@@ -185,13 +225,13 @@ export default function inputSelect() {
           componentsProps={{
             toolbar: {
               value: searchText,
-              onChange: (event) => requestSearch(event.target.value),
-              clearSearch: () => requestSearch(''),
-            },
+              onChange: event => requestSearch(event.target.value),
+              clearSearch: () => requestSearch('')
+            }
           }}
           localeText={PtbrLanguage}
         />
       </div>
     </div>
   )
-};
+}

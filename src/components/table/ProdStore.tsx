@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import Router from 'next/router'
-import { useSelector } from 'react-redux'
-import API from '../../../api/api'
+import React, { useEffect, useState, useMemo } from 'react'
+import { useSelector, RootStateOrAny } from 'react-redux'
+import API from '../../api/api'
 
 // Material UI
 import {
   DataGrid,
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
-  ptBR,
-  GridActionsCellItem
+  GridColDef,
+  GridEnrichedColDef,
+  GridActionsCellItem,
+  GridValueOptionsParams
 } from '@mui/x-data-grid'
 import PropTypes from 'prop-types'
 import Box from '@mui/material/Box'
@@ -17,19 +18,13 @@ import Modal from '@mui/material/Modal'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import InputSelectStore from '../Input/InputSelectStore'
+import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
-import PtbrLanguage from '../language/PtbrLanguage'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-
-import { ThemeProvider } from '@mui/material/styles'
+import CloseIcon from '@mui/icons-material/Close'
+import PtbrLanguage from '../../language/PtbrLanguage'
 
 // Quick Filter Material UI
 function escapeRegExp(value) {
@@ -101,7 +96,7 @@ export default function inputSelect() {
   const [companys, setCompanys] = useState([])
   const [listPropre, setListPropre] = useState([])
   const [prodToPropre, setProdToPropre] = useState('')
-  const cnpj = useSelector(state => state.select)
+  const cnpj = useSelector((state: RootStateOrAny) => state.select)
 
   const dateFormat = {
     valueFormatter: params => {
@@ -118,7 +113,7 @@ export default function inputSelect() {
   }
 
   // Columns
-  const columnsLojas = [
+  const columnsLojas: GridEnrichedColDef[] = [
     {
       field: 'id',
       headerName: 'Código',
@@ -127,56 +122,112 @@ export default function inputSelect() {
       align: 'center',
       headerAlign: 'center'
     },
-    { field: 'name', headerName: 'Cliente', type: 'string', width: 280 },
-    { field: 'fantasy', headerName: 'Fantasia', type: 'string', width: 200 },
+    { field: 'name', headerName: 'Produto', width: 280 },
+    { field: 'brand', headerName: 'Marca', width: 110, headerAlign: 'center' },
     {
-      field: 'nickname',
-      headerName: 'Apelido',
+      field: 'qty',
+      headerName: 'Estoque',
       type: 'number',
-      width: 150,
+      width: 90,
       align: 'center',
       headerAlign: 'center'
     },
     {
-      field: 'cnpjcpf',
-      headerName: 'CNPJ/CPF',
-      type: 'number',
-      width: 150,
-      headerAlign: 'center'
-    },
-    {
-      field: 'ie',
-      headerName: 'IE',
-      type: 'number',
-      width: 130,
-      headerAlign: 'center'
-    },
-    { field: 'address', headerName: 'Endereço', type: 'string', width: 210 },
-    {
-      field: 'fone',
-      headerName: 'Telefone',
-      type: 'number',
-      width: 130,
+      field: 'unit',
+      headerName: 'UN',
+      type: 'string',
+      width: 50,
       align: 'center',
       headerAlign: 'center'
     },
-    { field: 'obs', headerName: 'Observação', type: 'string', width: 350 }
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Preços',
+      getActions: params => [
+        <GridActionsCellItem
+          icon={<AttachMoneyIcon />}
+          onClick={priceRow(params)}
+          label="preços"
+        />
+      ]
+    },
+    { field: 'obs', headerName: 'Observação', width: 350 },
+    { field: 'inactive', headerName: 'Inativo?', type: 'boolean', width: 100 },
+    {
+      field: 'datechange',
+      headerName: 'Ultima Alteração',
+      type: 'date',
+      width: 220,
+      headerAlign: 'center',
+      align: 'center',
+      ...dateFormat
+    }
+    // { field: 'taxation', headerName: 'TRIB/CSOSN', width: 110 },
   ]
+
+  const columnsPropre: GridColDef[] = [
+    {
+      field: 'id',
+      headerName: 'Código',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'grade',
+      headerName: 'Grade',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'preco',
+      headerName: 'Preço',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'markup',
+      headerName: 'MarkUp',
+      type: 'number',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center'
+    }
+  ]
+
+  const priceRow = React.useCallback(
+    params => () => {
+      setProdToPropre(params.row.name)
+
+      API.get(`/propre?cpfcnpj=${cnpj}&idpro=${params.id}`).then(res => {
+        setListPropre(res.data.data)
+      })
+      handleOpen()
+    },
+    []
+  )
 
   // Faz requisição ao BackEnd quando CNPJ mudar e faz a lista de empresas para tabela
   useEffect(() => {
-    API.get(`/clientes?cpfcnpj=${cnpj}&idvendedor=1`)
+    API.get(`/produtos?cpfcnpj=${cnpj}`)
       .then(res => {
         setCompanys(
           res.data.data.map(company => ({
-            id: company.IDRC,
+            id: company.IDPRO,
             name: company.NOME,
-            fantasy: company.FANTASIA,
-            nickname: company.APELIDO,
-            cnpjcpf: company.CNPJCPF,
-            ie: company.IE,
-            address: company.ENDERECO,
-            fone: company.FONE,
+            brand: company.MARCA,
+            qty: company.QTE,
+            unit: company.UNIDADE,
+            datechange: company.DTALT,
+            inactive: company.INATIVO,
+            ntablets: company.NTABLET,
+            // taxation: company.COD_TRIB + '/' + company.CSOSN,
             obs: company.OBS
           }))
         )
@@ -210,12 +261,16 @@ export default function inputSelect() {
     setRows(companys)
   }, [companys])
 
+  // Variaveis/estilos do Modal de preço
+  const [open, setOpen] = React.useState(false)
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
+
   return (
     <div>
       <InputSelectStore></InputSelectStore>
       <div style={{ height: '80vh', width: '100%' }}>
         <DataGrid
-          localeText={{ ptBR }}
           rows={rows}
           columns={columnsLojas}
           pageSize={16}
@@ -231,6 +286,51 @@ export default function inputSelect() {
           }}
           localeText={PtbrLanguage}
         />
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 600,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4
+            }}
+          >
+            <Stack justifyContent="center" alignItems="center" spacing={1}>
+              <h3>Produto: {prodToPropre}</h3>
+              <div style={{ height: 400, width: '100%' }}>
+                <DataGrid
+                  rows={listPropre.map(propre => ({
+                    id: propre.idpreco,
+                    grade: propre.idgra,
+                    preco: 'R$: ' + propre.pvenda,
+                    markup: propre.markup + '%'
+                  }))}
+                  columns={columnsPropre}
+                  pageSize={6}
+                  rowsPerPageOptions={[6]}
+                  checkboxSelection={false}
+                  localeText={PtbrLanguage}
+                />
+              </div>
+              <Button
+                variant="contained"
+                onClick={handleClose}
+                endIcon={<CloseIcon />}
+              >
+                Fechar
+              </Button>
+            </Stack>
+          </Box>
+        </Modal>
       </div>
     </div>
   )

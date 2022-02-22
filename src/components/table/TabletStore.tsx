@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import API from '../../../api/api'
+import { useSelector, RootStateOrAny } from 'react-redux'
+import API from '../../api/api'
 
 // Material UI
 import {
   DataGrid,
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
-  ptBR,
+  GridEnrichedColDef,
   GridActionsCellItem
 } from '@mui/x-data-grid'
 import PropTypes from 'prop-types'
@@ -23,7 +23,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
-import PtbrLanguage from '../language/PtbrLanguage'
+import PtbrLanguage from '../../language/PtbrLanguage'
 
 // Quick Filter Material UI
 function escapeRegExp(value) {
@@ -96,11 +96,11 @@ export default function inputSelect() {
   const [listPropre, setListPropre] = useState([])
   const [prodToPropre, setProdToPropre] = useState('')
   const [idToDelete, setIdToDelete] = useState('')
-  const cnpj = useSelector(state => state.select)
+  const cnpj = useSelector((state: RootStateOrAny) => state.select)
   const [refreshRows, setRefreshRows] = useState(0)
 
   // Columns
-  const columnsLojas = [
+  const columnsLojas: GridEnrichedColDef[] = [
     {
       field: 'id',
       headerName: 'Código',
@@ -159,7 +159,7 @@ export default function inputSelect() {
 
   // Faz requisição ao BackEnd quando CNPJ mudar e faz a lista de empresas para tabela
   useEffect(() => {
-    API.get(`http://localhost:3333/tablet?cpfcnpj=${cnpj}`)
+    API.get(`/tablet?cpfcnpj=${cnpj}`)
       .then(res => {
         setCompanys(
           res.data.data.map((company, index) => ({
@@ -205,23 +205,11 @@ export default function inputSelect() {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
-  const styleModal = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 600,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    p: 4
-  }
-
   return (
     <div>
       <InputSelectStore></InputSelectStore>
       <div style={{ height: '80vh', width: '100%' }}>
         <DataGrid
-          localeText={{ ptBR }}
           rows={rows}
           columns={columnsLojas}
           pageSize={16}
@@ -243,7 +231,18 @@ export default function inputSelect() {
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
-          <Box sx={styleModal}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 600,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4
+            }}
+          >
             <Stack justifyContent="center" alignItems="center" spacing={1}>
               <h3>Deseja realmente Excluir o Tablet: ?</h3>
               <h4>{prodToPropre}</h4>

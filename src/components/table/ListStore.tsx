@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { connect, dispatch } from 'react-redux'
+import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import API from '../../../api/api'
+import API from '../../api/api'
 
 import { useSelector } from 'react-redux'
 
@@ -26,11 +26,10 @@ import SearchIcon from '@mui/icons-material/Search'
 import SendIcon from '@mui/icons-material/Send'
 import CloseIcon from '@mui/icons-material/Close'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
-import PtbrLanguage from '../language/PtbrLanguage'
+import PtbrLanguage from '../../language/PtbrLanguage'
 
 // Import Modal
 import AddCompany from '../modal/AddCompany'
-import EditCompany from '../modal/EditCompany'
 import { textAlign } from '@mui/system'
 
 // Quick Filter Material UI
@@ -219,23 +218,23 @@ const storeList = ({ refreshTable, dispatch }) => {
     }
   }
   React.useEffect(() => {
-    API.get(`/lojas?per_page=999`)
-      .then(res => {
-        setCompanys(
-          res.data.data.map(company => ({
-            id: company.IDLOJA,
-            cnpj: company.CNPJ,
-            nome: company.NOME,
-            fantasia: company.FANTASIA,
-            ntablets: company.NTABLET
-          }))
-        )
-        dispatch(setRefresh(false))
-      })
+    API.get(`/lojas?per_page=999`).then(res => {
+      setCompanys(
+        res.data.data.map(company => ({
+          id: company.IDLOJA,
+          cnpj: company.CNPJ,
+          nome: company.NOME,
+          fantasia: company.FANTASIA,
+          ntablets: company.NTABLET
+        }))
+      )
+      dispatch(setRefresh(false))
+    })
 
-      .catch(error => {
-        alert('Sem retorno do Banco de dados, Contate a Essystem !')
-      })
+    // .catch(error => {
+    //   alert('Sem retorno do Banco de dados, Contate a Essystem !')
+    //   console.log(error)
+    // })
   }, [refreshTable])
 
   return (
@@ -342,6 +341,4 @@ const storeList = ({ refreshTable, dispatch }) => {
     </div>
   )
 }
-export default connect(state => ({ refreshTable: state.refreshTable }))(
-  storeList
-)
+export default connect(state => ({ refreshTable: state }))(storeList)

@@ -60,7 +60,7 @@ export default function SignIn() {
             alignItems: 'center'
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <Avatar sx={{ m: 1, bgcolor: '#0D965E' }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
@@ -92,10 +92,10 @@ export default function SignIn() {
               id="pass"
               autoComplete="current-password"
             />
-            <FormControlLabel
+            {/* <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Lembrar"
-            />
+            /> */}
             <Button
               type="submit"
               fullWidth

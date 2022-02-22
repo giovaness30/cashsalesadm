@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import Router from 'next/router'
-import { useSelector } from 'react-redux'
-import API from '../../../api/api'
+import { useSelector, RootStateOrAny, connect } from 'react-redux'
+import API from '../../api/api'
 
 // Material UI
 import {
   DataGrid,
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
-  ptBR,
+  GridColDef,
   GridActionsCellItem
 } from '@mui/x-data-grid'
 import PropTypes from 'prop-types'
@@ -21,7 +21,7 @@ import IconButton from '@mui/material/IconButton'
 import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
-import PtbrLanguage from '../language/PtbrLanguage'
+import PtbrLanguage from '../../language/PtbrLanguage'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -101,7 +101,7 @@ export default function inputSelect() {
   const [companys, setCompanys] = useState([])
   const [listPropre, setListPropre] = useState([])
   const [prodToPropre, setProdToPropre] = useState('')
-  const cnpj = useSelector(state => state.select)
+  const cnpj = useSelector((state: RootStateOrAny) => state.select)
 
   const dateFormat = {
     valueFormatter: params => {
@@ -118,7 +118,7 @@ export default function inputSelect() {
   }
 
   // Columns
-  const columnsLojas = [
+  const columnsLojas: GridColDef[] = [
     {
       field: 'id',
       headerName: 'Código',
@@ -127,75 +127,57 @@ export default function inputSelect() {
       align: 'center',
       headerAlign: 'center'
     },
-    { field: 'name', headerName: 'Vendedor', type: 'string', width: 280 },
-    { field: 'login', headerName: 'Login', type: 'string', width: 80 },
+    { field: 'name', headerName: 'Cliente', type: 'string', width: 280 },
+    { field: 'fantasy', headerName: 'Fantasia', type: 'string', width: 200 },
     {
-      field: 'fone',
-      headerName: 'Telefone',
-      type: 'string',
-      width: 150,
-      align: 'center',
-      headerAlign: 'center'
-    },
-    {
-      field: 'tabDefault',
-      headerName: 'Tabela de Preço',
-      type: 'string',
-      width: 130,
-      align: 'center',
-      headerAlign: 'center'
-    },
-    {
-      field: 'dtAlt',
-      headerName: 'Data Alteração',
-      type: 'date',
-      width: 200,
-      align: 'center',
-      headerAlign: 'center',
-      ...dateFormat
-    },
-    {
-      field: 'password',
-      headerName: 'Senha',
-      type: 'string',
-      width: 210,
-      align: 'center',
-      headerAlign: 'center'
-    },
-    {
-      field: 'inactive',
-      headerName: 'Inativo?',
-      type: 'boolean',
-      width: 200,
-      align: 'center',
-      headerAlign: 'center',
-      ...dateFormat
-    },
-    {
-      field: 'maxOrder',
-      headerName: 'Cod.Pedido Maior',
+      field: 'nickname',
+      headerName: 'Apelido',
       type: 'number',
       width: 150,
       align: 'center',
       headerAlign: 'center'
-    }
+    },
+    {
+      field: 'cnpjcpf',
+      headerName: 'CNPJ/CPF',
+      type: 'number',
+      width: 150,
+      headerAlign: 'center'
+    },
+    {
+      field: 'ie',
+      headerName: 'IE',
+      type: 'number',
+      width: 130,
+      headerAlign: 'center'
+    },
+    { field: 'address', headerName: 'Endereço', type: 'string', width: 210 },
+    {
+      field: 'fone',
+      headerName: 'Telefone',
+      type: 'number',
+      width: 130,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { field: 'obs', headerName: 'Observação', type: 'string', width: 350 }
   ]
 
   // Faz requisição ao BackEnd quando CNPJ mudar e faz a lista de empresas para tabela
   useEffect(() => {
-    API.get(`http://localhost:3333/vendedor?cpfcnpj=${cnpj}`)
+    API.get(`/clientes?cpfcnpj=${cnpj}&idvendedor=1`)
       .then(res => {
         setCompanys(
           res.data.data.map(company => ({
-            id: company.IDVENDEDOR,
+            id: company.IDRC,
             name: company.NOME,
-            login: company.LOGIN,
-            fone: company.TELEFONE,
-            tabDefault: company.TABELADEFAULT,
-            dtAlt: company.DTALT,
-            password: company.SENHA,
-            inactive: company.INATIVO,
-            maxOrder: company.max_idped
+            fantasy: company.FANTASIA,
+            nickname: company.APELIDO,
+            cnpjcpf: company.CNPJCPF,
+            ie: company.IE,
+            address: company.ENDERECO,
+            fone: company.FONE,
+            obs: company.OBS
           }))
         )
       })
@@ -227,13 +209,11 @@ export default function inputSelect() {
   React.useEffect(() => {
     setRows(companys)
   }, [companys])
-
   return (
     <div>
       <InputSelectStore></InputSelectStore>
       <div style={{ height: '80vh', width: '100%' }}>
         <DataGrid
-          localeText={{ ptBR }}
           rows={rows}
           columns={columnsLojas}
           pageSize={16}

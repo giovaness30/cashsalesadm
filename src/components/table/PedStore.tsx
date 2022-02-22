@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import Router from 'next/router'
-import { useSelector } from 'react-redux'
-import API from '../../../api/api'
+import { useSelector, RootStateOrAny } from 'react-redux'
+import API from '../../api/api'
 
 // Material UI
 import {
   DataGrid,
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
-  ptBR,
+  GridColDef,
   GridActionsCellItem
 } from '@mui/x-data-grid'
 import PropTypes from 'prop-types'
@@ -20,7 +20,7 @@ import InputSelectStore from '../Input/InputSelectStore'
 import IconButton from '@mui/material/IconButton'
 import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
-import PtbrLanguage from '../language/PtbrLanguage'
+import PtbrLanguage from '../../language/PtbrLanguage'
 
 import { ThemeProvider } from '@mui/material/styles'
 
@@ -94,7 +94,7 @@ export default function inputSelect() {
   const [companys, setCompanys] = useState([])
   const [listPropre, setListPropre] = useState([])
   const [prodToPropre, setProdToPropre] = useState('')
-  const cnpj = useSelector(state => state.select)
+  const cnpj = useSelector((state: RootStateOrAny) => state.select)
 
   const dateFormat = {
     valueFormatter: params => {
@@ -122,7 +122,7 @@ export default function inputSelect() {
     cellClassName: 'font-tabular-nums'
   }
   // Columns
-  const columnsLojas = [
+  const columnsLojas: GridColDef[] = [
     {
       field: 'id',
       headerName: 'ID',
@@ -346,7 +346,6 @@ export default function inputSelect() {
       <InputSelectStore></InputSelectStore>
       <div style={{ height: '80vh', width: '100%' }}>
         <DataGrid
-          localeText={{ ptBR }}
           rows={rows}
           columns={columnsLojas}
           pageSize={16}

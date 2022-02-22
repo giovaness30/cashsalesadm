@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
           setCookie(undefined, 'sales-token', token, {
             maxAge: 60 * 60 * 1 //1hour
           })
-          Router.push('/dashboard')
+          setTimeout(() => Router.push('/dashboard'), 1000)
         }
       })
       .catch(error => setSnackError(true))

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import Router from 'next/router'
 import { connect } from 'react-redux'
-import API from '../../../api/api'
+import API from '../../api/api'
 
 // Input material
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
+import { string } from 'prop-types'
 
 function listCompanys({ valueSelect, dispatch }) {
-  const [companyList, setCompanys] = useState([''])
+  const [companyList, setCompanys] = useState(string[''])
 
   useEffect(() => {
     API.get(`/lojas?per_page=999`)
@@ -40,14 +41,14 @@ function listCompanys({ valueSelect, dispatch }) {
           labelId="demo-simple-select-label"
           id="demo-simple-select"
           // value={[valueSelect]}
-          value={[valueSelect]}
+          value={[valueSelect.select]}
           label="Empresa"
           onChange={event => dispatch(setSelected(event))}
         >
           <MenuItem disabled value="99999999999999">
             <em>Selecionar...</em>
           </MenuItem>
-          {companyList.map((company, index) => (
+          {companyList?.map((company, index) => (
             <MenuItem key={index} value={company.CNPJ}>
               {company.NOME}
             </MenuItem>
@@ -57,4 +58,4 @@ function listCompanys({ valueSelect, dispatch }) {
     </div>
   )
 }
-export default connect(state => ({ valueSelect: state.select }))(listCompanys)
+export default connect(state => ({ valueSelect: state }))(listCompanys)

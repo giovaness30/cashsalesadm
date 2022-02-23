@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Router from 'next/router'
 import { connect } from 'react-redux'
 import API from '../../api/api'
+import { parseCookies } from 'nookies'
 
 // Input material
 import InputLabel from '@mui/material/InputLabel'
@@ -13,8 +14,15 @@ import { string } from 'prop-types'
 function listCompanys({ valueSelect, dispatch }) {
   const [companyList, setCompanys] = useState(string[''])
 
+  const { 'sales-token': token } = parseCookies()
+  const optionsApi = {
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
+  }
+
   useEffect(() => {
-    API.get(`/lojas?per_page=999`)
+    API.get(`/lojas?per_page=999`, optionsApi)
       .then(res => {
         setCompanys(res.data.data)
       })

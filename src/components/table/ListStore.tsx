@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import API from '../../api/api'
+import { parseCookies } from 'nookies'
 
 import { useSelector } from 'react-redux'
 
@@ -100,6 +101,36 @@ QuickSearchToolbar.propTypes = {
 
 const storeList = ({ refreshTable, dispatch }) => {
   const [companys, setCompanys] = useState([])
+  const { 'sales-token': token } = parseCookies()
+  const optionsApi = {
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
+  }
+
+  React.useEffect(() => {
+    // console.log(API)
+
+    API.get(`/lojas?per_page=999`, optionsApi)
+      .then(res => {
+        setCompanys(
+          res.data.data.map(company => ({
+            id: company.IDLOJA,
+            cnpj: company.CNPJ,
+            nome: company.NOME,
+            fantasia: company.FANTASIA,
+            ntablets: company.NTABLET
+          }))
+        )
+        // console.log(res)
+        // dispatch(setRefresh(false))
+      })
+
+      .catch(error => {
+        // alert('Sem retorno do Banco de dados, Contate a Essystem !')
+        console.log(error)
+      })
+  }, [refreshTable])
 
   // Varaveis do filtros da Datagrid
   const [searchText, setSearchText] = React.useState('')
@@ -200,7 +231,7 @@ const storeList = ({ refreshTable, dispatch }) => {
       NTABLET: inputs.tablet
     })
 
-    API.patch(`/lojas`, data).then(res => {
+    API.patch(`/lojas`, data, optionsApi).then(res => {
       setSnackSuccess(true)
       dispatch(setRefresh(true))
       handleClose()
@@ -217,25 +248,6 @@ const storeList = ({ refreshTable, dispatch }) => {
       refreshTable
     }
   }
-  React.useEffect(() => {
-    API.get(`/lojas?per_page=999`).then(res => {
-      setCompanys(
-        res.data.data.map(company => ({
-          id: company.IDLOJA,
-          cnpj: company.CNPJ,
-          nome: company.NOME,
-          fantasia: company.FANTASIA,
-          ntablets: company.NTABLET
-        }))
-      )
-      dispatch(setRefresh(false))
-    })
-
-    // .catch(error => {
-    //   alert('Sem retorno do Banco de dados, Contate a Essystem !')
-    //   console.log(error)
-    // })
-  }, [refreshTable])
 
   return (
     <div style={{ height: '80vh' }}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, RootStateOrAny } from 'react-redux'
 import API from '../../api/api'
+import { parseCookies } from 'nookies'
 
 // Material UI
 import {
@@ -98,6 +99,12 @@ export default function inputSelect() {
   const [idToDelete, setIdToDelete] = useState('')
   const cnpj = useSelector((state: RootStateOrAny) => state.select)
   const [refreshRows, setRefreshRows] = useState(0)
+  const { 'sales-token': token } = parseCookies()
+  const optionsApi = {
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
+  }
 
   // Columns
   const columnsLojas: GridEnrichedColDef[] = [
@@ -149,7 +156,10 @@ export default function inputSelect() {
     []
   )
   const deleteTablet = () => {
-    API.delete(`/tablet?cpfcnpj=${cnpj}&idvendedor=${idToDelete}`).then(res => {
+    API.delete(
+      `/tablet?cpfcnpj=${cnpj}&idvendedor=${idToDelete}`,
+      optionsApi
+    ).then(res => {
       console.log(res.data.data)
     })
     handleClose()
@@ -159,7 +169,7 @@ export default function inputSelect() {
 
   // Faz requisição ao BackEnd quando CNPJ mudar e faz a lista de empresas para tabela
   useEffect(() => {
-    API.get(`/tablet?cpfcnpj=${cnpj}`)
+    API.get(`/tablet?cpfcnpj=${cnpj}`, optionsApi)
       .then(res => {
         setCompanys(
           res.data.data.map((company, index) => ({

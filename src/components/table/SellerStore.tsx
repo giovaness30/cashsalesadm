@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Router from 'next/router'
 import { useSelector, RootStateOrAny } from 'react-redux'
 import API from '../../api/api'
+import { parseCookies } from 'nookies'
 
 // Material UI
 import {
@@ -101,6 +102,12 @@ export default function inputSelect() {
   const [listPropre, setListPropre] = useState([])
   const [prodToPropre, setProdToPropre] = useState('')
   const cnpj = useSelector((state: RootStateOrAny) => state.select)
+  const { 'sales-token': token } = parseCookies()
+  const optionsApi = {
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
+  }
 
   const dateFormat = {
     valueFormatter: params => {
@@ -182,7 +189,7 @@ export default function inputSelect() {
 
   // Faz requisição ao BackEnd quando CNPJ mudar e faz a lista de empresas para tabela
   useEffect(() => {
-    API.get(`/vendedor?cpfcnpj=${cnpj}`)
+    API.get(`/vendedor?cpfcnpj=${cnpj}`, optionsApi)
       .then(res => {
         setCompanys(
           res.data.data.map(company => ({

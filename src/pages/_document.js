@@ -1,8 +1,8 @@
-import * as React from 'react';
-import Document, { Html, Head, Main, NextScript } from 'next/document';
-import createEmotionServer from '@emotion/server/create-instance';
-import theme from '../theme';
-import createEmotionCache from '../createEmotionCache';
+import * as React from 'react'
+import Document, { Html, Head, Main, NextScript } from 'next/document'
+import createEmotionServer from '@emotion/server/create-instance'
+import theme from '../theme'
+import createEmotionCache from '../createEmotionCache'
 
 export default class MyDocument extends Document {
   render() {
@@ -10,6 +10,30 @@ export default class MyDocument extends Document {
       <Html lang="pt-BR">
         <Head>
           {/* PWA primary color */}
+          <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/favicon/apple-touch-icon.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/favicon/favicon-32x32.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/favicon/favicon-16x16.png"
+          />
+          <link rel="manifest" href="/favicon/site.webmanifest" />
+          <link
+            rel="mask-icon"
+            href="/favicon/safari-pinned-tab.svg"
+            color="#000000"
+          />
+          <link rel="shortcut icon" href="/favicon/favicon.ico" />
           <meta name="theme-color" content={theme.palette.primary.main} />
           <link
             rel="stylesheet"
@@ -21,13 +45,13 @@ export default class MyDocument extends Document {
           <NextScript />
         </body>
       </Html>
-    );
+    )
   }
 }
 
 // `getInitialProps` belongs to `_document` (instead of `_app`),
 // it's compatible with static-site generation (SSG).
-MyDocument.getInitialProps = async (ctx) => {
+MyDocument.getInitialProps = async ctx => {
   // Resolution order
   //
   // On the server:
@@ -50,37 +74,40 @@ MyDocument.getInitialProps = async (ctx) => {
   // 3. app.render
   // 4. page.render
 
-  const originalRenderPage = ctx.renderPage;
+  const originalRenderPage = ctx.renderPage
 
   // You can consider sharing the same emotion cache between all the SSR requests to speed up performance.
   // However, be aware that it can have global side effects.
-  const cache = createEmotionCache();
-  const { extractCriticalToChunks } = createEmotionServer(cache);
+  const cache = createEmotionCache()
+  const { extractCriticalToChunks } = createEmotionServer(cache)
 
   ctx.renderPage = () =>
     originalRenderPage({
-      enhanceApp: (App) =>
+      enhanceApp: App =>
         function EnhanceApp(props) {
-          return <App emotionCache={cache} {...props} />;
-        },
-    });
+          return <App emotionCache={cache} {...props} />
+        }
+    })
 
-  const initialProps = await Document.getInitialProps(ctx);
+  const initialProps = await Document.getInitialProps(ctx)
   // This is important. It prevents emotion to render invalid HTML.
   // See https://github.com/mui-org/material-ui/issues/26561#issuecomment-855286153
-  const emotionStyles = extractCriticalToChunks(initialProps.html);
-  const emotionStyleTags = emotionStyles.styles.map((style) => (
+  const emotionStyles = extractCriticalToChunks(initialProps.html)
+  const emotionStyleTags = emotionStyles.styles.map(style => (
     <style
       data-emotion={`${style.key} ${style.ids.join(' ')}`}
       key={style.key}
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: style.css }}
     />
-  ));
+  ))
 
   return {
     ...initialProps,
     // Styles fragment is rendered after the app and page rendering finish.
-    styles: [...emotionStyleTags, ...React.Children.toArray(initialProps.styles)],
-  };
-};
+    styles: [
+      ...emotionStyleTags,
+      ...React.Children.toArray(initialProps.styles)
+    ]
+  }
+}

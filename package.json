@@ -23,6 +23,7 @@
     "prop-types": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "react-input-mask": "^2.0.4",
     "react-redux": "^7.2.6",
     "ts-node": "^10.4.0"
   },

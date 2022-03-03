@@ -11,6 +11,7 @@ import {
   DataGrid,
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
+  GridEnrichedColDef,
   ptBR,
   GridActionsCellItem
 } from '@mui/x-data-grid'
@@ -32,6 +33,7 @@ import PtbrLanguage from '../../language/PtbrLanguage'
 // Import Modal
 import AddCompany from '../modal/AddCompany'
 import { textAlign } from '@mui/system'
+import { Phone } from '@mui/icons-material'
 
 // Quick Filter Material UI
 function escapeRegExp(value) {
@@ -119,7 +121,9 @@ const storeList = ({ refreshTable, dispatch }) => {
             cnpj: company.CNPJ,
             nome: company.NOME,
             fantasia: company.FANTASIA,
-            ntablets: company.NTABLET
+            ntablets: company.NTABLET,
+            phone: company.FONE,
+            email: company.EMAIL
           }))
         )
         // console.log(res)
@@ -162,15 +166,11 @@ const storeList = ({ refreshTable, dispatch }) => {
 
   // const refresh = useSelector((state) => state.refresh);
 
-  const columnsLojas = [
-    { field: 'id', headerName: 'Código', type: 'number', width: 100 },
-    { field: 'cnpj', headerName: 'CNPJ/CPF', width: 150 },
-    { field: 'nome', headerName: 'Nome', width: 270 },
-    { field: 'fantasia', headerName: 'Fantasia', width: 250 },
-    { field: 'ntablets', headerName: 'N° de Tablets', width: 120 },
+  const columnsLojas: GridEnrichedColDef[] = [
     {
       field: 'actions',
       type: 'actions',
+      width: 70,
       getActions: params => [
         <GridActionsCellItem
           icon={<EditIcon />}
@@ -178,7 +178,25 @@ const storeList = ({ refreshTable, dispatch }) => {
           label="preços"
         />
       ]
-    }
+    },
+    {
+      field: 'id',
+      headerName: 'Código',
+      type: 'number',
+      width: 80,
+      align: 'center'
+    },
+    { field: 'cnpj', headerName: 'CNPJ/CPF', width: 150 },
+    { field: 'nome', headerName: 'Nome', width: 270 },
+    { field: 'fantasia', headerName: 'Fantasia', width: 250 },
+    {
+      field: 'ntablets',
+      headerName: 'N° de Tablets',
+      width: 120,
+      align: 'center'
+    },
+    { field: 'phone', headerName: 'Telefone', width: 120 },
+    { field: 'email', headerName: 'E-mail', width: 270 }
   ]
 
   const style = {
@@ -203,7 +221,9 @@ const storeList = ({ refreshTable, dispatch }) => {
     cpfCnpj: 0,
     name: '',
     fantasy: '',
-    tablet: 0
+    tablet: 0,
+    phone: '',
+    email: ''
   })
 
   const editCompany = React.useCallback(
@@ -215,7 +235,9 @@ const storeList = ({ refreshTable, dispatch }) => {
         cpfCnpj: row.cnpj,
         name: row.nome,
         fantasy: row.fantasia,
-        tablet: row.ntablets
+        tablet: row.ntablets,
+        phone: row.phone,
+        email: row.email
       })
       handleOpen()
     },
@@ -228,7 +250,9 @@ const storeList = ({ refreshTable, dispatch }) => {
       CNPJ: inputs.cpfCnpj,
       NOME: inputs.name,
       FANTASIA: inputs.fantasy,
-      NTABLET: inputs.tablet
+      NTABLET: inputs.tablet,
+      FONE: inputs.phone,
+      EMAIL: inputs.email
     })
 
     API.patch(`/lojas`, data, optionsApi).then(res => {
@@ -275,38 +299,49 @@ const storeList = ({ refreshTable, dispatch }) => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Stack justifyContent="center" alignItems="center" spacing={2}>
-            <TextField
-              id="inputCpfcnpj"
-              label="CPF/CNPJ"
-              type="number"
-              value={inputs.cpfCnpj}
-              onChange={e =>
-                setInputs({ ...inputs, cpfCnpj: Number(e.target.value) })
-              }
-              disabled
-            />
-            <TextField
-              id="inputName"
-              label="Nome"
-              value={inputs.name}
-              onChange={e => setInputs({ ...inputs, name: e.target.value })}
-            />
-            <TextField
-              id="setInputFantasy"
-              label="Fantasia"
-              value={inputs.fantasy}
-              onChange={e => setInputs({ ...inputs, fantasy: e.target.value })}
-            />
-            <TextField
-              id="inputTablet"
-              label="Tablet"
-              value={inputs.tablet}
-              onChange={e =>
-                setInputs({ ...inputs, tablet: Number(e.target.value) })
-              }
-            />
-          </Stack>
+          <TextField
+            id="inputCpfcnpj"
+            label="CPF/CNPJ"
+            type="number"
+            value={inputs.cpfCnpj}
+            onChange={e =>
+              setInputs({ ...inputs, cpfCnpj: Number(e.target.value) })
+            }
+            disabled
+          />
+          <TextField
+            id="inputName"
+            label="Nome"
+            value={inputs.name}
+            onChange={e => setInputs({ ...inputs, name: e.target.value })}
+          />
+          <TextField
+            id="setInputFantasy"
+            label="Fantasia"
+            value={inputs.fantasy}
+            onChange={e => setInputs({ ...inputs, fantasy: e.target.value })}
+          />
+          <TextField
+            id="inputTablet"
+            label="Tablet"
+            value={inputs.tablet}
+            onChange={e =>
+              setInputs({ ...inputs, tablet: Number(e.target.value) })
+            }
+          />
+          <TextField
+            id="inputPhone"
+            label="Telefone"
+            value={inputs.phone}
+            type="phone"
+            onChange={e => setInputs({ ...inputs, phone: e.target.value })}
+          />
+          <TextField
+            id="inputEmail"
+            label="Email"
+            value={inputs.email}
+            onChange={e => setInputs({ ...inputs, email: e.target.value })}
+          />
 
           <Stack
             direction="row"

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import API from '../../api/api'
 import { connect } from 'react-redux'
+import { parseCookies } from 'nookies'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -10,6 +11,7 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import SendIcon from '@mui/icons-material/Send'
 import Snackbar from '@mui/material/Snackbar'
+import InputMask from 'react-input-mask'
 
 import CloseIcon from '@mui/icons-material/Close'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
@@ -41,6 +43,13 @@ const BasicModal = ({ refreshTable, dispatch }) => {
 
   const handleClose = () => {
     setOpen(false), clearInputs()
+  }
+
+  const { 'sales-token': token } = parseCookies()
+  const optionsApi = {
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
   }
 
   const [inputs, setInputs] = useState({
@@ -84,7 +93,7 @@ const BasicModal = ({ refreshTable, dispatch }) => {
         EMAIL: inputs.email
       }
     ])
-    API.post(`/lojas`, data)
+    API.post(`/lojas`, data, optionsApi)
       .then(response => {
         const res = response.data[0]
         // console.log(res);
@@ -99,6 +108,7 @@ const BasicModal = ({ refreshTable, dispatch }) => {
         } else {
           setSnackError(true)
           setSnackErrorMsg(res.message)
+          console.log(res)
         }
       })
       .catch(error => {
@@ -169,15 +179,24 @@ const BasicModal = ({ refreshTable, dispatch }) => {
       >
         <Box sx={style}>
           <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-            <TextField
-              required
-              id="inputCpfcnpj"
-              label="CPF/CNPJ"
+            <InputMask
+              mask={'99999999999999' || '99999999999'}
+              maskChar=" "
               value={inputs.cpfCnpj}
-              type="number"
+              // type="number"
               onChange={e => setInputs({ ...inputs, cpfCnpj: e.target.value })}
-              error={errorCpfCnpj}
-            />
+            >
+              {() => (
+                <TextField
+                  required
+                  label="CPF/CNPJ"
+                  value={inputs.cpfCnpj}
+                  id="inputCpfcnpj"
+                  error={errorCpfCnpj}
+                />
+              )}
+            </InputMask>
+
             <TextField
               required
               id="inputName"
@@ -209,7 +228,7 @@ const BasicModal = ({ refreshTable, dispatch }) => {
               required
               id="inputTablet"
               label="Fone"
-              type="number"
+              type="phone"
               value={inputs.fone}
               onChange={e => setInputs({ ...inputs, fone: e.target.value })}
               error={errorFone}
